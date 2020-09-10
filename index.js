@@ -3,9 +3,11 @@
 import images from './gallery-items.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-  const gallery = document.querySelector('.js-gallery');
-  const modal = document.querySelector('.js-lightbox');
-  const lightboxImage = document.querySelector('.lightbox__image');
+  const galleryRef = {
+    gallery: document.querySelector('.js-gallery'),
+    modal: document.querySelector('.js-lightbox'),
+    lightboxImage: document.querySelector('.lightbox__image'),
+  };
 
   const createGallery = () => {
     images.map(image => {
@@ -21,31 +23,39 @@ document.addEventListener("DOMContentLoaded", () => {
       galleryImage.setAttribute('alt', image.description);
       galleryLink.appendChild(galleryImage);
       galleryItem.appendChild(galleryLink);
-      gallery.appendChild(galleryItem);
+      galleryRef.gallery.appendChild(galleryItem);
     });
   }
   createGallery();
 
-  const showModal = (elem) => {
-    lightboxImage.setAttribute('src', elem.dataset.source);
-    lightboxImage.setAttribute('alt', elem.alt);
-    modal.classList.add('is-open');
-  };
-
-  const hideModal = () => {
-    modal.classList.remove('is-open');
-    lightboxImage.setAttribute('src', "");
-    lightboxImage.setAttribute('alt', "");
-  }
-
-  document.body.addEventListener('click', (event) => {
+  const showModal = (event) => {
     event.preventDefault();
     const { target } = event;
+    const imgSrc = target.closest('.gallery__image').dataset.source;
+    const imgAlt = target.alt;
+    galleryRef.lightboxImage.setAttribute('src', imgSrc);
+    galleryRef.lightboxImage.setAttribute('alt', imgAlt);
+    galleryRef.modal.classList.add('is-open');
+  };
 
-    showModal(target);
+  const hideModal = (event) => {
+    const { target } = event;
 
-    if (target.nodeName !== 'IMG') {
-      hideModal();
-   }
-  })
+    if(target.nodeName !== 'IMG') {
+      galleryRef.modal.classList.remove('is-open');
+      galleryRef.lightboxImage.setAttribute('src', "");
+      galleryRef.lightboxImage.setAttribute('alt', "");
+    }
+  };
+
+  const hideModalWithEsc = (event) => {
+
+    if(event.code === 'Escape') {
+      galleryRef.modal.classList.remove('is-open');
+    }
+  };
+
+  galleryRef.gallery.addEventListener('click', showModal);
+  galleryRef.modal.addEventListener('click', hideModal);
+  document.addEventListener('keydown', hideModalWithEsc);
 });
